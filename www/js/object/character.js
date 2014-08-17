@@ -1,28 +1,39 @@
 var Character = function(s, good, type, spawnPos) {
     if (good) {
         if (type == 0) {
-            this.spd = 5;
+            this.acc = 0.3;
+            this.maxSpd = 5;
             this.size = 50;
             this.sprite = FLIXI.createSprite("/img/char1.png", this.size, this.size)
         }
     }
-
+    this.spd = {x: 0, y: 0}
     this.sprite.x = spawnPos.x
     this.sprite.y = spawnPos.y
 
-    this.getNextPos = function(x, y) {
-        var ret = {
-            x: this.sprite.x,
-            y: this.sprite.y
-        }
+    this.applyDesiredAcc = function(x, y) {
         var xdist = x - this.sprite.x
         var ydist = y - this.sprite.y
         var dist = Math.sqrt((xdist * xdist) + (ydist * ydist))
-        if (dist > 5) {
-            ret.x = this.sprite.x + (this.spd / dist) * xdist
-            ret.y = this.sprite.y + (this.spd / dist) * ydist
+        if(dist>this.size){
+        	this.spd.x += (this.acc * xdist) / (dist) * 3
+        	this.spd.y += (this.acc * ydist) / (dist) * 3
+        }else{
+        	this.spd.x /= 1.3
+        	this.spd.y /= 1.3
         }
-        return ret
+        
+    }
+
+    this.move = function(){
+    	var mag = Math.sqrt(this.spd.x*this.spd.x + this.spd.y*this.spd.y)
+    	if(mag>this.maxSpd){
+    		this.spd.x*=(this.maxSpd/mag)
+    		this.spd.y*=(this.maxSpd/mag)
+    	}
+
+    	this.sprite.x+=this.spd.x
+    	this.sprite.y+=this.spd.y
     }
 
     this.collidesWith = function(c){

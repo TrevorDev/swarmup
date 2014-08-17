@@ -2,6 +2,7 @@ var FLIXI = {
     RunEveryFrame: function(x) {
         var loop = function() {
             x();
+            //setTimeout(loop, 15)
             requestAnimFrame(loop);
         }
         loop();
@@ -32,10 +33,16 @@ var FLIXI = {
         }
 
         this.runAnimateLoop = function(x) {
+            var stats = new Stats();
+            document.body.appendChild( stats.domElement );
+            stats.domElement.style.position = "absolute";
+            stats.domElement.style.top = "0px";
             var scrn = this;
             FLIXI.RunEveryFrame(function() {
+                stats.begin();
                 x();
                 scrn.render();
+                stats.end();
             })
         }
 

@@ -86,8 +86,23 @@ $(".storeBtn").each(function(i, item) {
 
 
 s.runAnimateLoop(function() {
-    $.grep(gameState.swarm, function(c) {
-        var oldPos = c.getPos()
+    $.each(gameState.swarm, function(i, c) {
+        c.applyDesiredAcc(gameState.pos.x, gameState.pos.y);
+
+        $.each(gameState.swarm, function(j, obj) {
+            if (obj != c) {
+                if(obj.collidesWithSphere(c)){
+                    var dist = c.calcDist(obj)
+                    var cPos = c.getPos()
+                    var objPos = obj.getPos()
+                    c.spd.x -= 2*(objPos.x - cPos.x)/dist
+                    c.spd.y -= 2*(objPos.y - cPos.y)/dist
+                }
+            }
+        })
+
+        c.move()
+        /*var oldPos = c.getPos()
         var nxtPos = c.getNextPos(gameState.pos.x, gameState.pos.y);
         c.moveTo(nxtPos) 
         var hit = false;
@@ -95,17 +110,17 @@ s.runAnimateLoop(function() {
             if (obj != c) {
                 if(obj.collidesWithSphere(c)){
                     hit = true
-                    //return false
+                    return false
                 }
             }
         })
         if(hit){
-           /*var xm = oldPos.x - nxtPos.x
+           var xm = oldPos.x - nxtPos.x
            var ym = oldPos.y - nxtPos.y
            nxtPos.x = oldPos.x+ym;
-           nxtPos.y = oldPos.y-xm;*/
-           c.moveTo(oldPos) 
-        }
+           nxtPos.y = oldPos.y-xm;
+           c.moveTo(nxtPos) 
+        }*/
         
     })
     floor.checkAndRedraw(gameState.pos.x, gameState.pos.y)
