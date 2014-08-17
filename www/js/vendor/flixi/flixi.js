@@ -32,18 +32,26 @@ var FLIXI = {
             return {x: x, y: y};
         }
 
-        this.runAnimateLoop = function(x) {
-            var stats = new Stats();
-            document.body.appendChild( stats.domElement );
-            stats.domElement.style.position = "absolute";
-            stats.domElement.style.top = "0px";
+        this.runAnimateLoop = function(x, statsEnabled) {
             var scrn = this;
-            FLIXI.RunEveryFrame(function() {
-                stats.begin();
-                x();
-                scrn.render();
-                stats.end();
-            })
+            if(statsEnabled){
+                var stats = new Stats();
+                document.body.appendChild( stats.domElement );
+                stats.domElement.style.position = "absolute";
+                stats.domElement.style.top = "0px";
+                FLIXI.RunEveryFrame(function() {
+                    stats.begin();
+                    x();
+                    scrn.render();
+                    stats.end();
+                })
+            }else{
+                FLIXI.RunEveryFrame(function() {
+                    x();
+                    scrn.render();
+                })
+            }
+            
         }
 
         this.resize = function(x, y) {
@@ -66,8 +74,16 @@ var FLIXI = {
             moveTowards: function(x, y) {
                 var xdist = -thisScreen.container.position.x - x
                 var ydist = -thisScreen.container.position.y - y
-                thisScreen.container.position.x += xdist/50;
-                thisScreen.container.position.y += ydist/50;
+                xm = xdist/50
+                ym = ydist/50
+                if(Math.abs(xm) > 2){
+                    thisScreen.container.position.x += xm;
+                }
+                if(Math.abs(ym) > 2){
+                    thisScreen.container.position.y += ym;
+                }
+                
+                
             },
             zoom: function(x) {
                 thisScreen.container.scale.x *= x;

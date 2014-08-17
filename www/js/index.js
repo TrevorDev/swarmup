@@ -53,7 +53,11 @@ var slideMenu = new SlideMenu($("#gameMenu"), $("#gameMenuGrab"))
 var s = new FLIXI.Screen($("#myCanvas"));
 s.resize(window.innerWidth, window.innerHeight) //set to screen res
 
+
+var touchedMax = 60;
+var touched = touchedMax;
 $("#myCanvas").on("mousedown touchstart touchmove", function(e) {
+    touched = touchedMax
     e.preventDefault();
     slideMenu.setMenu(0)
     if (e.type == "mousedown") {
@@ -86,10 +90,13 @@ $(".storeBtn").each(function(i, item) {
 
 
 s.runAnimateLoop(function() {
+    touched--;
+
     $.each(gameState.swarm, function(i, c) {
+        if(touched>0){
         c.applyDesiredAcc(gameState.pos.x, gameState.pos.y);
 
-        $.each(gameState.swarm, function(j, obj) {
+        $.each(gameState.swarm, function(i, obj) {
             if (obj != c) {
                 if(obj.collidesWithSphere(c)){
                     var dist = c.calcDist(obj)
@@ -100,8 +107,9 @@ s.runAnimateLoop(function() {
                 }
             }
         })
-
+        
         c.move()
+        }
         /*var oldPos = c.getPos()
         var nxtPos = c.getNextPos(gameState.pos.x, gameState.pos.y);
         c.moveTo(nxtPos) 
@@ -125,4 +133,4 @@ s.runAnimateLoop(function() {
     })
     floor.checkAndRedraw(gameState.pos.x, gameState.pos.y)
     s.camera.moveTowards(gameState.pos.x - (s.origWidth / 2), gameState.pos.y - (s.origHeight / 2))
-});
+},true);
