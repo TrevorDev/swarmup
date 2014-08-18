@@ -3,7 +3,7 @@ var GameState = function(){
 	this.evilArmy = []
 	this.gold = 500
 	this.pos = {x:0,y:0}
-
+	this.dangerLevel = 0
 	this.spendGold = function(amt){
 		if(amt <= this.gold){
 			this.gold -= amt
@@ -13,11 +13,17 @@ var GameState = function(){
 		return false
 	}
 
+	this.addGold = function(amt){
+		this.spendGold(-amt)
+	}
+
 	this.updateGold = function(){
 		$("#cashDisp").html("Gold: "+this.gold+"g")
 	}
 
 	this.setPos = function(x,y){
+		this.dangerLevel = -Math.floor(y/1000)
+		$("#dangerLevel").html("Danger Level: "+this.dangerLevel)
 		this.pos.x = x
 		this.pos.y = y
 	}

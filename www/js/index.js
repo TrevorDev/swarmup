@@ -66,10 +66,6 @@ $("#myCanvas").on("mousedown touchstart touchmove", function(e) {
         var touch = e.originalEvent.touches[0] || e.originalEvent.changedTouches[0];
         var pos = s.getRelativePos(touch.pageX, touch.pageY)
         gameState.setPos(pos.x, pos.y)
-        /*var img = FLIXI.createSprite("/img/char1.png", 50, 50)
-        img.x = pos.x
-        img.y = pos.y
-        s.container.addChild(img)*/
     }
 })
 
@@ -79,9 +75,13 @@ $(".storeBtn").each(function(i, item) {
     $(item).on("click", function() {
         if (i == 0) {
             if (gameState.spendGold(5)) {
-                var character = new Character(s, true, 0, Character.radialRandPos(gameState.pos.x, gameState.pos.y, s.origWidth/2))
+                var character = new Character(s, true, i, Character.radialRandPos(gameState.pos.x, gameState.pos.y, s.origWidth / 2))
                 gameState.swarm.push(character)
-                //s.container.addChild(img)
+            }
+        }else if(i == 1){
+            if (gameState.spendGold(50)) {
+                var character = new Character(s, true, i, Character.radialRandPos(gameState.pos.x, gameState.pos.y, s.origWidth / 2))
+                gameState.swarm.push(character)
             }
         }
     })
@@ -92,45 +92,62 @@ $(".storeBtn").each(function(i, item) {
 s.runAnimateLoop(function() {
     touched--;
 
+    //swam movement
     $.each(gameState.swarm, function(i, c) {
-        if(touched>0){
-        c.applyDesiredAcc(gameState.pos.x, gameState.pos.y);
+        if (touched > 0) {
+            c.applyDesiredAcc(gameState.pos.x, gameState.pos.y);
 
-        $.each(gameState.swarm, function(i, obj) {
-            if (obj != c) {
-                if(obj.collidesWithSphere(c)){
-                    var dist = c.calcDist(obj)
-                    var cPos = c.getPos()
-                    var objPos = obj.getPos()
-                    c.spd.x -= 2*(objPos.x - cPos.x)/dist
-                    c.spd.y -= 2*(objPos.y - cPos.y)/dist
+            $.each(gameState.swarm, function(i, obj) {
+                if (obj != c) {
+                    if (obj.collidesWithSphere(c)) {
+                        var dist = c.calcDist(obj)
+                        var cPos = c.getPos()
+                        var objPos = obj.getPos()
+                        c.spd.x -= 2 * (objPos.x - cPos.x) / dist
+                        c.spd.y -= 2 * (objPos.y - cPos.y) / dist
+                    }
                 }
-            }
-        })
-        
-        c.move()
+            })
+            c.move()
         }
-        /*var oldPos = c.getPos()
-        var nxtPos = c.getNextPos(gameState.pos.x, gameState.pos.y);
-        c.moveTo(nxtPos) 
-        var hit = false;
-        $.each(gameState.swarm, function(i, obj) {
-            if (obj != c) {
-                if(obj.collidesWithSphere(c)){
-                    hit = true
-                    return false
-                }
-            }
-        })
-        if(hit){
-           var xm = oldPos.x - nxtPos.x
-           var ym = oldPos.y - nxtPos.y
-           nxtPos.x = oldPos.x+ym;
-           nxtPos.y = oldPos.y-xm;
-           c.moveTo(nxtPos) 
-        }*/
-        
     })
+
+    //attacking
+    gameState.evilArmy = $.grep(gameState.evilArmy, function(evil){
+        gameState.swarm = $.grep(gameState.swarm, function(good){
+            var d = good.calcDist(evil)
+            if(d < good.size){
+                evil.takeHit(good.dmg)
+            }
+            if(d < evil.size){
+                good.takeHit(evil.dmg)
+            }
+            if(good.health<=0){
+                good.destroy()
+                return false
+            }
+            return true
+        })
+        var xd = evil.getPos().x - gameState.pos.x
+        var yd = evil.getPos().y - gameState.pos.y
+        var dist = Math.sqrt(xd*xd+yd*yd)
+        if(dist > s.origHeight || evil.health <= 0){
+            if(evil.health <= 0){
+                gameState.addGold(evil.payout)
+            }
+            evil.destroy()
+            return false;
+        }
+        return true
+    })
+
+    //spawning evil
+    while(gameState.evilArmy.length < 10){
+        var character = new Character(s, false, gameState.dangerLevel, Character.radialRandPos(gameState.pos.x, gameState.pos.y, s.origHeight))
+        gameState.evilArmy.push(character)
+    }
+
+
     floor.checkAndRedraw(gameState.pos.x, gameState.pos.y)
     s.camera.moveTowards(gameState.pos.x - (s.origWidth / 2), gameState.pos.y - (s.origHeight / 2))
-},true);
+}, true);
