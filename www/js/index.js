@@ -47,9 +47,8 @@ var app = {
 
 var gameState = new GameState()
 gameState.updateGold()
-
 var slideMenu = new SlideMenu($("#gameMenu"), $("#gameMenuGrab"))
-
+slideMenu.setMenu(0)
 var s = new FLIXI.Screen($("#myCanvas"));
 s.resize(window.innerWidth, window.innerHeight) //set to screen res
 
@@ -70,25 +69,39 @@ $("#myCanvas").on("mousedown touchstart touchmove", function(e) {
 })
 
 var floor = new FloorDrawer(s, 1000, 1000)
+var instruct = FLIXI.createSprite("/img/instruct.png", 500, 500)
+instruct.y+=100
+instruct.x+=20
+s.container.addChild(instruct)
 
 $(".storeBtn").each(function(i, item) {
     $(item).on("click", function() {
+        var price = 0;
         if (i == 0) {
-            if (gameState.spendGold(5)) {
-                var character = new Character(s, true, i, Character.radialRandPos(gameState.pos.x, gameState.pos.y, s.origWidth / 2))
-                gameState.swarm.push(character)
-            }
+            price = 5
         }else if(i == 1){
-            if (gameState.spendGold(50)) {
-                var character = new Character(s, true, i, Character.radialRandPos(gameState.pos.x, gameState.pos.y, s.origWidth / 2))
-                gameState.swarm.push(character)
-            }
+            price = 50   
+        }else if(i == 2){
+            price = 200  
+        }else if(i == 3){
+            price = 1000 
+        }else if(i == 4){
+            price = 9001
+        }else if(i == 5){
+            price = 50000   
+        }else if(i == 6){
+            price = 1000000   
+        }
+
+        if (gameState.spendGold(price)) {
+            var character = new Character(s, true, i, {x:gameState.pos.x, y:gameState.pos.y})//Character.radialRandPos(gameState.pos.x, gameState.pos.y, s.origWidth))
+            gameState.swarm.push(character)
         }
     })
 })
 
 
-
+gameState.setPos((s.origWidth / 2), (s.origHeight / 2))
 s.runAnimateLoop(function() {
     touched--;
 
@@ -147,6 +160,9 @@ s.runAnimateLoop(function() {
         gameState.evilArmy.push(character)
     }
 
+    if(gameState.gold == 0 && gameState.swarm.length == 0){
+        gameState.addGold(5)
+    }
 
     floor.checkAndRedraw(gameState.pos.x, gameState.pos.y)
     s.camera.moveTowards(gameState.pos.x - (s.origWidth / 2), gameState.pos.y - (s.origHeight / 2))

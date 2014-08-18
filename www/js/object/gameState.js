@@ -1,7 +1,7 @@
 var GameState = function(){
 	this.swarm = []
 	this.evilArmy = []
-	this.gold = 500
+	this.gold = 0
 	this.pos = {x:0,y:0}
 	this.dangerLevel = 0
 	this.spendGold = function(amt){
@@ -22,7 +22,7 @@ var GameState = function(){
 	}
 
 	this.setPos = function(x,y){
-		this.dangerLevel = -Math.floor(y/1000)
+		this.dangerLevel = -Math.floor(y/2000)
 		$("#dangerLevel").html("Danger Level: "+this.dangerLevel)
 		this.pos.x = x
 		this.pos.y = y
